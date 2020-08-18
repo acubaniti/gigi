@@ -94,7 +94,7 @@ client.on('message', async message => {
   //These are the arguments behind the commands.
   var args = message.content.split(' ').slice(1);
 
-	const dropRate = 2;
+	const dropRate = 4;
 
   if(message.author != client.user && message.author.id != 723002601066594376 && Math.floor(Math.random() * 3) == dropRate && !message.content.startsWith(settings.prefix)){
 		function randomDrop() {
@@ -114,7 +114,7 @@ client.on('message', async message => {
 		  message.react(dropRange[r])
 		  .catch(() => console.error('One of the emojis failed to react.'));
 		  eco.AddToBalance(message.author.id, dropValue[r]);
-			message.reply(' ai castigat ' + dropValue[r] + ' mei')
+			// message.reply(' ai castigat ' + dropValue[r] + ' mei')
 		  }
 
 	  randomDrop();
@@ -327,7 +327,7 @@ client.on('message', async message => {
 
     var amount = args[0] //Coins to gamble
 
-    if (!amount) return message.reply('Cat vr		ei sa joci?')
+    if (!amount) return message.reply('Cat vrei sa joci?')
 
     var output = await eco.FetchBalance(message.author.id)
     if (output.balance < amount) return message.reply('Esti sarac, n-ai bani!')
