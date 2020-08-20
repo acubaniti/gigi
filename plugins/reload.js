@@ -1,10 +1,10 @@
 
 //Requiring Packages
 const Discord = require('discord.js'); //This can also be discord.js-commando or other node based packages!
-const eco = require("discord-economy");
+// const eco = require("discord-economy");
 var settings = require("../config.json");
 module.exports = {
-	name: 'reset',
+	name: 'reload',
 	// description: 'Ia-ti spaga',
 async	execute(message, args){
 

@@ -2,6 +2,8 @@
 //Requiring Packages
 const Discord = require('discord.js'); //This can also be discord.js-commando or other node based packages!
 const eco = require("discord-economy");
+var settings = require("../config.json");
+
 
 module.exports = {
 	name: 'tax',
@@ -16,7 +18,7 @@ async	execute(message, args){
 
 			var transfer = await eco.SubtractFromBalance(user.id, amount)
 			var balance = await eco.FetchBalance(user.id)
-			message.reply(amount + " taxa la " + user.id + "n\ portofel: "+ balance.balance);
+			message.reply(amount + " taxa la <@" + user.id + ">");
 
 		}
 	}

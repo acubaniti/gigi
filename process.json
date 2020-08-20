@@ -1,0 +1,9 @@
+{
+  "script": "run.js",
+  "watch": ["run.js", "/plugins/*.js"],
+  "ignore_watch" : ["node_modules", "database.sqlite"],
+  "watch_options": {
+    "followSymlinks": false
+  },
+     "name": "Gigi Bot"
+}
