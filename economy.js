@@ -1,28 +1,155 @@
-function randomDrop() {
-     var dropRange = [
-         "🥇",
-         "🥈",
-         "🥉",
+/*
+If you want to make discord-economy guild based you have to use message.author.id + message.guild.id as ID for example:
+eco.Daily(message.author.id + message.guild.id)
 
-     ];
-     var dropValue = [
-         "50",
-         "25",
-         "1"
+This will create a unique ID for each guild member
+*/
 
-     ];
-     var r = Math.floor(Math.random() * dropRange.length);
-     message.react(dropRange[r])
-     .catch(() => console.error('One of the emojis failed to react.'));
-     eco.AddToBalance(message.author.id, dropValue[r])
+
+//Requiring Packages
+const fs = require('fs');
+const Discord = require('discord.js'); //This can also be discord.js-commando or other node based packages!
+const eco = require("discord-economy");
+
+//Create the bot client
+const client = new Discord.Client();
+
+// Command handler
+client.commands = new Discord.Collection();
+const commandFiles = fs.readdirSync('./plugins').filter(file => file.endsWith('.js'));
+for (const file of commandFiles) {
+	const command = require(`./plugins/${file}`);
+	client.commands.set(command.name, command);
+	console.log(`${file} loaded`);
 }
 
+//Set the prefix and token of the bot.
+// Get authentication data
+try {
+	var settings = require("./config.json");
+} catch (e){
+	console.log("Please create an config.json like config.json.example with a bot token or an email and password.\n"+e.stack); // send message for error - no token
+	process.exit();
+}
+// inside a command, event listener, etc.
+const help = new Discord.MessageEmbed()
+	.setTitle('Salut saracie, uite comenzile')
+	// .setURL('https://discord.js.org/')
+	// .setAuthor('Some name', 'https://i.imgur.com/wSTFkRM.png', 'https://discord.js.org')
+	.setDescription('Credinta in Dumnezeu e cea mai mare valoare pentru un roman, dupa bani desigur, he he! Aicia totu merge pe mei, melu, e moneda nationala a Romuiei, sau cel putin cam atat valoreaza\n\n\n')
+	// .setThumbnail('https://i.imgur.com/wSTFkRM.png')
+	.addFields(
+		{ name: '$portofel', value: 'Vezi cati mei ai.' },
+		{ name: '$top', value: 'Cine e numaru unu?' },
+		{ name: '$transfer', value: 'Ca de la matusa tamara, fara urme si complet legal.' },
+		{ name: '$spaga', value: 'Ia-ti spaga, o data pe zi.' },
+		{ name: '$munca', value: 'Du-te la munca, saracule!' },
+		// { name: '$ban', value: 'Da cu banu, cap sau pajura!' },
+		{ name: '$barbut', value: 'Joaca un barbut cu baietii.' },
+		{ name: '$pacanele', value: 'Baga un ban la pacanea ca baietii.' }
 
+	)
+	const adminHelp = new Discord.MessageEmbed()
+	.setTitle('Si comenzile de bastan')
+	// .setURL('https://discord.js.org/')
+	// .setAuthor('Some name', 'https://i.imgur.com/wSTFkRM.png', 'https://discord.js.org')
+	.setDescription('Banii sunt ochiul dracului!')
+	// .setThumbnail('https://i.imgur.com/wSTFkRM.png')
+		.addFields(
+			{ name: '$setbalance', value: 'Defineste poftofelul la fraier.' },
+			{ name: '$addbalance', value: 'Adauga la fraier in portofel' },
+			{ name: '$taxeaza', value: 'Taxeaza fraierul' },
+			{ name: '$delete', value: 'Sterge-i portofelul la fraier' },
+			{ name: '$spagareset', value: 'reseteaza spaga' }
+
+
+
+		)
+client.commands = new Discord.Collection();
+
+// var Permissions = {};
+// try{
+// 	Permissions = require("./permissions.json");
+// } catch(e){
+// 	console.log("Please create an permissions.json like auth.json.example with a bot token or an email and password.\n"+e.stack); // send message for error - no token
+//  	process.exit();
+// }
+
+
+client.on('message', async message => {
+  // if (message.author != client.user && message.isMentioned(client.user)) {
+  //     var vadimQuotes = [
+  //     "Aşa cum Austria e o ţară de doctori, România e o ţară de preşedinţi – fiecare neisprăvit e preşedinte pe undeva.",
+  //     "Recunosc că în materie de politică sunt zero. Kilometrul zero, am vrut să spun.",
+  //     "Am consultat un medic: era grav bolnav!"
+  //     ];
+  // var vadimQuote = Math.floor(Math.random() * vadimQuotes.length);
+  // msg.channel.send(vadimQuotes[vadimQuote]); //using a mention here can lead to looping
+  //
+  // }
+
+
+  //This reads the first part of your message behind your prefix to see which command you want to use.
+  var command = message.content.toLowerCase().slice(settings.prefix.length).split(' ')[0];
+
+  //These are the arguments behind the commands.
+  var args = message.content.split(' ').slice(1);
+
+	const dropRate = 4;
+
+  if(message.author != client.user && message.author.id != 723002601066594376 && Math.floor(Math.random() * 3) == dropRate && !message.content.startsWith(settings.prefix)){
+		function randomDrop() {
+			const dropRange = [
+			"🥇",
+			"🥈",
+			"🥉",
+
+			];
+			const dropValue = [
+			"50",
+			"25",
+			"1"
+			];
+
+		  var r = Math.floor(Math.random() * dropRange.length);
+		  message.react(dropRange[r])
+		  .catch(() => console.error('One of the emojis failed to react.'));
+		  eco.AddToBalance(message.author.id, dropValue[r]);
+			// message.reply(' ai castigat ' + dropValue[r] + ' mei')
+		  }
+
+	  randomDrop();
+
+		// const filter = (reaction, user) => {
+		// 	return reaction.emoji.name === '🥉' && user.id === message.author.id;
+		// };
+		//
+		// message.awaitReactions(filter, { max: 30, time: 10000, errors: ['time'] })
+		// 	.then(collected => console.log(collected.size))
+		// 	.catch(collected => {
+		// 		console.log(`After a minute, only ${collected.size} out of 4 reacted.`);
+		// 		message.reply(`After a minute, only ${collected.size} out of 4 reacted.`)
+		// 		eco.AddToBalance(message.author.id, collected.size);
+		// 	});
+
+ }
+
+
+
+
+  //If the message does not start with your prefix return.
+  //If the user that types a message is a bot account return.
+  if (!message.content.startsWith(settings.prefix) || message.author.bot) return;
+  if (command === 'ajutor' && settings.admin == message.author.id) { message.reply(help); message.reply(adminHelp); } else if ( command === 'ajutor') {message.reply(help);}
   if (command === 'portofel') {
 
     var output = await eco.FetchBalance(message.author.id)
-    message.channel.send(`${message.author.tag} ai castigat ${output.balance} monede.`);
+    message.reply(` ai ${output.balance} monede.`);
   }
+
+	// if (command === 'ping') {
+ 	// 	client.commands.get('ping').execute();
+ 	// }
 
   if (command === 'spaga') {
 
@@ -40,7 +167,7 @@ function randomDrop() {
 
   }
 
-  if (command === 'resetdaily' &&  admin == message.author.id) {
+  if (command === 'spagareset' &&  settings.admin == message.author.id) {
 
     var output = await eco.ResetDaily(message.author.id)
 
@@ -48,7 +175,7 @@ function randomDrop() {
 
   }
 
-	  if (command === 'setbalance' &&  admin == message.author.id) {
+	  if (command === 'setbalance' &&  settings.admin == message.author.id) {
 			var user = message.mentions.users.first()
 			var amount = args[1]
 
@@ -57,10 +184,11 @@ function randomDrop() {
 
 			var transfer = await eco.SetBalance(user.id, amount)
 			var balance = await eco.FetchBalance(user.id)
-			message.reply( user.id + " portofel: "+ balance.balance);
+			message.reply("portofel: "+ balance.balance);
 
 	  }
-		if (command === 'addbalance' &&  admin == message.author.id) {
+
+		if (command === 'addbalance' &&  settings.admin  == message.author.id) {
 			var user = message.mentions.users.first()
 			var amount = args[1]
 
@@ -72,7 +200,7 @@ function randomDrop() {
 			message.reply(amount + " spaga la " + user.id + "n\ portofel: "+ balance.balance);
 
 	  }
-		if (command === 'substract' &&  admin == message.author.id) {
+		if (command === 'taxeaza' &&  settings.admin  == message.author.id) {
 			var user = message.mentions.users.first()
 			var amount = args[1]
 
@@ -81,9 +209,10 @@ function randomDrop() {
 
 			var transfer = await eco.SubtractFromBalance(user.id, amount)
 			var balance = await eco.FetchBalance(user.id)
-			message.reply(amount + " substracted from " + user.id + "n\ new balance: "+ balance.balance);
+			message.reply(amount + " spaga la " + user.id + "n\ portofel: "+ balance.balance);
 
 		}
+
   if (command === 'top') {
 
     //If you use discord-economy guild based you can use the filter() function to only allow the database within your guild
@@ -136,22 +265,23 @@ function randomDrop() {
     var transfer = await eco.Transfer(message.author.id, user.id, amount)
     message.reply(`Transfering coins successfully done!\nBalance from ${message.author.tag}: ${transfer.FromUser}\nBalance from ${user.tag}: ${transfer.ToUser}`);
   }
-
-  if (command === 'coinflip') {
-
-    var flip = args[0] //Heads or Tails
-    var amount = args[1] //Coins to gamble
-
-    if (!flip || !['heads', 'tails'].includes(flip)) return message.reply('Please specify the flip, either heads or tails!')
-    if (!amount) return message.reply('Specify the amount you want to gamble!')
-
-    var output = await eco.FetchBalance(message.author.id)
-    if (output.balance < amount) return message.reply('You have fewer coins than the amount you want to gamble!')
-
-    var gamble = await eco.Coinflip(message.author.id, flip, amount).catch(console.error)
-    message.reply(`You ${gamble.output}! New balance: ${gamble.newbalance}`)
-
-  }
+	//
+  // if (command === 'moneda') {
+	//
+  //   var flip = args[0] //Heads or Tails
+  //   var amount = args[1] //Coins to gamble
+	//
+  //   if (!flip || !['cap', 'pajura'].includes(flip)) return message.reply('Cap sau pajura?')
+  //   // if (!amount) return message.reply('Cat vrei sa joci bastanule?!')
+	// 	if (!amount) var amount = 10
+	//
+  //   var output = await eco.FetchBalance(message.author.id)
+  //   if (output.balance < amount) return message.reply('N-ai bani, esti sarac!')
+	//
+  //   var gamble = await eco.Coinflip(message.author.id, flip, amount).catch(console.error)
+  //   message.reply(`You ${gamble.output}! New balance: ${gamble.newbalance}`)
+	//
+  // }
 
   if (command === 'barbut') {
 
@@ -159,22 +289,21 @@ function randomDrop() {
     var amount = args[1] //Coins to gamble
 
     if (!roll || ![1, 2, 3, 4, 5, 6].includes(parseInt(roll))) return message.reply('Zi un numar intre 1-6')
-    if (!amount) var amount = 10
+		// if (!amount) return message.reply('Cat vrei sa joci bastanule?!')
+		if (!amount) var amount = 10
 
     var output = eco.FetchBalance(message.author.id)
     if (output.balance < amount) return message.reply('N-ai bani, saracie!')
 
     var gamble = await eco.Dice(message.author.id, roll, amount).catch(console.error)
-    message.reply(`Ai dat \`${gamble.dice}\`. Ai ${gamble.output}! New balance: ${gamble.newbalance}`)
+    message.reply(`Ai dat \`${gamble.dice}\`. Ai ${gamble.output}! Portofel: ${gamble.newbalance}`)
 
   }
 
-  if (command == 'delete' && 493189989128077342 == message.author.id){ //You want to make this command admin only!
+  if (command == 'delete' && settings.admin == message.author.id){ //You want to make this command admin only!
 
     var user = message.mentions.users.first()
     if (!user) return message.reply('Please specify a user I have to delete in my database!')
-
-    if (!message.guild.me.hasPermission(`ADMINISTRATION`)) return message.reply('You need to be admin to execute this command!')
 
     var output = await eco.Delete(user.id)
     if (output.deleted == true) return message.reply('Successfully deleted the user out of the database!')
@@ -219,11 +348,64 @@ function randomDrop() {
   }
 
 
+
   if(message.author == client.user){
       return true; //returning true to prevent feedback from commands
   }
 
+	// if (message.isMemberMentioned(client.user)) {
+	// // 		var vadimQuotes = [
+	// // 		"Aşa cum Austria e o ţară de doctori, România e o ţară de preşedinţi – fiecare neisprăvit e preşedinte pe undeva.",
+	// // 		"Recunosc că în materie de politică sunt zero. Kilometrul zero, am vrut să spun.",
+	// // 		"Am consultat un medic: era grav bolnav!",
+	// // 		];
+	// // var vadimQuote = Math.floor(Math.random() * vadimQuotes.length);
+	// // message.channel.send(vadimQuotes[vadimQuote]); //using a mention here can lead to looping
+	// console.log(test);
+	//
+	// }
+
+	// if (command === 'avatar') {
+	// 	if (args[0]) {
+	// 		const user = message.mentions.users.first();
+	// 		if (!user) {
+	// 			return message.reply('Please use a proper mention if you want to see someone else\'s avatar.');
+	// 		}
+	//
+	// 		return message.channel.send(`${user.username}'s avatar: ${user.displayAvatarURL({ dynamic: true })}`);
+	// 	}
+	//
+	// 	return message.channel.send(`${message.author.username}, your avatar: ${message.author.displayAvatarURL({ dynamic: true })}`);
+	// }
+	//
+	//
+
+
+
+
+
+
+
+
+
+
+
+
+
 });
+// Create an event listener for new guild members
+client.on('guildMemberAdd', member => {
+  // Send the message to a designated channel on a server:
+  const channel = member.guild.channels.cache.find(ch => ch.name === 'gambling-house');
+  // Do nothing if the channel wasn't found on this server
+  if (!channel) return;
+  // Send the message, mentioning the member
+  channel.send(`Ai primit 100 de mei, ${member}, scrie $ajutor pentru a vedea comenzile de joc.`);
+	var amount = 100;
+	var transfer = eco.SetBalance(member.id, amount)
+	var balance = eco.FetchBalance(member.id)
+});
+
 
 //Your secret token to log the bot in. (never show this to anyone!)
 client.login(settings.token)
