@@ -6,7 +6,7 @@ var settings = require("../config.json");
 
 module.exports = {
 	name: 'delete',
-	description: 'Ia-ti spaga',
+	// description: 'Ia-ti spaga',
 async	execute(message, args){
 
   if (settings.admin == message.author.id){ //You want to make this command admin only!

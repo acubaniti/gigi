@@ -5,7 +5,7 @@ const eco = require("discord-economy");
 
 module.exports = {
 	name: 'munca',
-	description: 'Ia-ti spaga',
+	// description: 'Ia-ti spaga',
 async	execute(message, args){
 
     var output = await eco.Work(message.author.id)

@@ -21,7 +21,6 @@ async	execute(message, args){
     }).catch(console.error)
 
     message.channel.send(gamble.grid)
-
     message.channel.send(`Ai ${gamble.output}!`)
 
 
