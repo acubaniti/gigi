@@ -107,3 +107,5 @@ dist
 .sqlite/
 *.sqlite
 database.sqlite
+*.sqlite
+database.sqlite
