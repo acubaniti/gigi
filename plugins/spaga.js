@@ -21,17 +21,5 @@ async	execute(message, args){
 
 	}
 };
-// module.exports = {
-// 	name: 'spagareset',
-// 	description: 'Ia-ti spaga',
-// async	execute(message, args){
-//
-// 	  if (settings.admin == message.author.id) {
-//
-// 	    var output = await eco.ResetDaily(message.author.id)
-//
-// 	    message.reply(output) //It will send 'Daily Reset.'
-//
-// 		}
-// 	  }
-// };
+ 
+// <Guild>.members Guild>.members.array() .cache

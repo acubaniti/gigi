@@ -18,10 +18,11 @@ async	execute(message, args){
     var gamble = await eco.Slots(message.author.id, amount, {
       width: 3,
       height: 1
-    }).catch(console.error)
+    })
+		// .catch(console.error)
 
-    message.channel.send(gamble.grid)
-    message.channel.send(`Ai ${gamble.output}!`)
+  await  message.channel.send(gamble.grid)
+  await  message.channel.send(`Ai ${gamble.output}!`)
 
 
 

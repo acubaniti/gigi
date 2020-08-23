@@ -36,12 +36,28 @@ const help = new Discord.MessageEmbed()
 
 
 		)
+		const testHelp = new Discord.MessageEmbed()
+		.setTitle('comenzile de test')
+		// .setURL('https://discord.js.org/')
+		// .setAuthor('Some name', 'https://i.imgur.com/wSTFkRM.png', 'https://discord.js.org')
+		// .setDescription('Credinta in Dumnezeu e cea mai mare valoare pentru un roman, dupa bani desigur, he he! Aicia totu merge pe mei, melu, e moneda nationala a Romuiei, sau cel putin cam atat valoreaza')
+		// .setThumbnail('https://i.imgur.com/wSTFkRM.png')
+			.addFields(
+				{ name: '$inventory', value: 'test' },
+				{ name: '$balance', value: 'test' },
+				{ name: '$western', value: 'test' },
+				{ name: '$buy', value: 'test' },
+				{ name: '$leaderboard', value: 'test' },
+				{ name: '$shop', value: 'test' }
 
+
+
+			)
 module.exports = {
 	name: 'ajutor',
 	description: 'Ajutor',
 async	execute(message, args){
-    if (settings.admin == message.author.id) { message.reply(help); message.reply(adminHelp); }
+    if (settings.admin == message.author.id) { message.reply(help); message.reply(adminHelp); message.reply(testHelp); }
 		else {message.reply(help);}
 
 	}

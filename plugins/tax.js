@@ -18,7 +18,7 @@ async	execute(message, args){
 
 			var transfer = await eco.SubtractFromBalance(user.id, amount)
 			var balance = await eco.FetchBalance(user.id)
-			message.reply(amount + " taxa la <@" + user.id + ">");
+			message.reply(amount + " l-am taxat pe <@" + user.id + ">");
 
 		}
 	}

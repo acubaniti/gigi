@@ -1,7 +1,7 @@
 {
   "script": "run.js",
   "watch": ["run.js", "/plugins/*.js"],
-  "ignore_watch" : ["node_modules", "database.sqlite"],
+  "ignore_watch" : ["node_modules", "database.sqlite", "database.sqlite-journal"],
   "watch_options": {
     "followSymlinks": false
   },
