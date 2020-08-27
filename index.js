@@ -3,64 +3,82 @@ const queuing = require("./queue.js");
 const dbQueue = new queuing();
 
 const sequelize = new Sequelize('database', 'Hot123', '132435465768798', {
-  host: 'localhost',
-  dialect: 'sqlite',
-  logging: false,
-  storage: 'database.sqlite',
+	host: 'localhost',
+	dialect: 'sqlite',
+	logging: false,
+	storage: 'database.sqlite',
 });
 
-const DB = sequelize.define('Economy', {
-  userID: {
-    type: Sequelize.STRING,
-    unique: true,
-  },
-  balance: Sequelize.INTEGER,
-  daily: Sequelize.INTEGER,
-});
 
-DB.sync()
+// sequelize.define('Economy', {
+//   user_id: {
+//     type: Sequelize.STRING,
+//     unique: true,
+//   },
+//   balance: Sequelize.INTEGER,
+//   daily: Sequelize.INTEGER,
+// });
+//
+// const DB = sequelize.define('users', {
+//   user_id: {
+//     type: DataTypes.STRING,
+//     primaryKey: true,
+//   },
+//   balance: {
+//     type: DataTypes.INTEGER,
+//     defaultValue: 0,
+//     allowNull: false,
+//   },
+//   daily: Sequelize.INTEGER,
+// }, {
+//   timestamps: false,
+// });
+//
+const Users = require('./models/Users')(sequelize, Sequelize.DataTypes);
+
+// Users.sync()
 
 console.log('\x1b[32m%s\x1b[0m', `═[Discord-Economy Database Loaded -V1.2.2]═[Support server: https://discord.gg/eBFKDbx]=`);
-
+console.log('pulka');
 module.exports = {
 
-  SetBalance: function(UserID, toSet) {
+  SetBalance: function(user_id, toSet) {
     return dbQueue.addToQueue({
       "value": this._SetBalance.bind(this),
-      "args": [UserID, toSet]
+      "args": [user_id, toSet]
     });
   },
 
-  _SetBalance: async function(UserID, toSet) {
-    if (!UserID) throw new Error('SetBalance function is missing parameters!')
+  _SetBalance: async function(user_id, toSet) {
+    if (!user_id) throw new Error('SetBalance function is missing parameters!')
     if (!toSet && toSet != 0) throw new Error('SetBalance function is missing parameters!')
     if (!parseInt(toSet)) throw new Error('SetBalance function parameter toSet needs to be a number!')
     toSet = parseInt(toSet)
 
     return new Promise(async (resolve, error) => {
 
-      const Info = await DB.update({
+      const Info = await Users.update({
         balance: toSet
       }, {
         where: {
-          userID: UserID
+          user_id: user_id
         }
       });
       if (Info > 0) {
         return resolve({
-          userid: UserID,
+          user_id: user_id,
           balance: toSet
         })
       } else {
 
         try {
-          const Info2 = await DB.create({
-            userID: UserID,
+          const Info2 = await Users.create({
+            user_id: user_id,
             balance: 0,
             daily: 0
           });
           return resolve({
-            userid: UserID,
+            user_id: user_id,
             balance: toSet
           })
         } catch (e) {
@@ -75,38 +93,38 @@ module.exports = {
     });
   },
 
-  AddToBalance: function(UserID, toAdd) {
+  AddToBalance: function(user_id, toAdd) {
     return dbQueue.addToQueue({
       "value": this._AddToBalance.bind(this),
-      "args": [UserID, toAdd]
+      "args": [user_id, toAdd]
     });
   },
 
-  _AddToBalance: async function(UserID, toAdd) {
-    if (!UserID) throw new Error('AddToBalance function is missing parameters!')
+  _AddToBalance: async function(user_id, toAdd) {
+    if (!user_id) throw new Error('AddToBalance function is missing parameters!')
     if (!toAdd && toAdd != 0) throw new Error('AddToBalance function is missing parameters!')
     if (!parseInt(toAdd)) throw new Error('AddToBalance function parameter toAdd needs to be a number!')
     toAdd = parseInt(toAdd)
 
     return new Promise(async (resolve, error) => {
 
-      const Info = await DB.findOne({
+      const Info = await Users.findOne({
         where: {
-          userID: UserID
+          user_id: user_id
         }
       });
       if (Info) {
 
-        const Info2 = await DB.update({
+        const Info2 = await Users.update({
           balance: Info.balance + toAdd
         }, {
           where: {
-            userID: UserID
+            user_id: user_id
           }
         });
         if (Info2 > 0) {
           return resolve({
-            userid: UserID,
+            user_id: user_id,
             oldbalance: Info.balance,
             newbalance: Info.balance + toAdd,
           })
@@ -119,38 +137,38 @@ module.exports = {
     });
   },
 
-  SubtractFromBalance: function(UserID, toSubtract) {
+  SubtractFromBalance: function(user_id, toSubtract) {
     return dbQueue.addToQueue({
       "value": this._SubtractFromBalance.bind(this),
-      "args": [UserID, toSubtract]
+      "args": [user_id, toSubtract]
     });
   },
 
-  _SubtractFromBalance: async function(UserID, toSubtract) {
-    if (!UserID) throw new Error('SubtractFromBalance function is missing parameters!')
+  _SubtractFromBalance: async function(user_id, toSubtract) {
+    if (!user_id) throw new Error('SubtractFromBalance function is missing parameters!')
     if (!toSubtract && toSubtract != 0) throw new Error('SubtractFromBalance function is missing parameters!')
     if (!parseInt(toSubtract)) throw new Error('SubtractFromBalance function parameter toSubtract needs to be a number!')
     toSubtract = parseInt(toSubtract)
 
     return new Promise(async (resolve, error) => {
 
-      const Info = await DB.findOne({
+      const Info = await Users.findOne({
         where: {
-          userID: UserID
+          user_id: user_id
         }
       });
       if (Info) {
 
-        const Info2 = await DB.update({
+        const Info2 = await Users.update({
           balance: Info.balance - toSubtract
         }, {
           where: {
-            userID: UserID
+            user_id: user_id
           }
         });
         if (Info2 > 0) {
           return resolve({
-            userid: UserID,
+            user_id: user_id,
             oldbalance: Info.balance,
             newbalance: Info.balance - toSubtract
           })
@@ -163,36 +181,36 @@ module.exports = {
     });
   },
 
-  FetchBalance: function(UserID) {
+  FetchBalance: function(user_id) {
     return dbQueue.addToQueue({
       "value": this._FetchBalance.bind(this),
-      "args": [UserID]
+      "args": [user_id]
     });
   },
 
-  _FetchBalance: async function(UserID) {
-    if (!UserID) throw new Error('FetchBalance function is missing parameters!')
+  _FetchBalance: async function(user_id) {
+    if (!user_id) throw new Error('FetchBalance function is missing parameters!')
     return new Promise(async (resolve, error) => {
 
-      const Info = await DB.findOne({
+      const Info = await Users.findOne({
         where: {
-          userID: UserID
+          user_id: user_id
         }
       });
       if (Info) {
         return resolve({
-          userid: Info.userID,
+          user_id: Info.user_id,
           balance: Info.balance
         })
       }
       try {
-        const Info2 = await DB.create({
-          userID: UserID,
+        const Info2 = await Users.create({
+          user_id: user_id,
           balance: 0,
           daily: 0
         });
         return resolve({
-          userid: UserID,
+          user_id: user_id,
           balance: 0
         })
       } catch (e) {
@@ -220,7 +238,7 @@ module.exports = {
 
       if (data.search) {
 
-        const Info = await DB.findAll({
+        const Info = await Users.findAll({
           where: {
             balance: {
               [Sequelize.Op.gt]: 0
@@ -228,17 +246,17 @@ module.exports = {
           }
         })
 
-        let output = Info.map(l => l.userID + ' ' + l.balance).sort((a, b) => b.split(' ')[1] - a.split(' ')[1]).map(l => new Object({
-          userid: l.split(' ')[0],
+        let output = Info.map(l => l.user_id + ' ' + l.balance).sort((a, b) => b.split(' ')[1] - a.split(' ')[1]).map(l => new Object({
+          user_id: l.split(' ')[0],
           balance: l.split(' ')[1]
-        })).filter(data.filter).slice(0, data.limit).findIndex(l => l.userid == data.search)
+        })).filter(data.filter).slice(0, data.limit).findIndex(l => l.user_id == data.search)
 
         if (output == -1) return resolve('Not found')
         return resolve(output + 1)
 
       } else {
 
-        const Info = await DB.findAll({
+        const Info = await Users.findAll({
           where: {
             balance: {
               [Sequelize.Op.gt]: 0
@@ -246,8 +264,8 @@ module.exports = {
           }
         })
 
-        let output = Info.map(l => l.userID + ' ' + l.balance).sort((a, b) => b.split(' ')[1] - a.split(' ')[1]).map(l => new Object({
-          userid: l.split(' ')[0],
+        let output = Info.map(l => l.user_id + ' ' + l.balance).sort((a, b) => b.split(' ')[1] - a.split(' ')[1]).map(l => new Object({
+          user_id: l.split(' ')[0],
           balance: l.split(' ')[1]
         })).filter(data.filter).slice(0, data.limit)
 
@@ -258,15 +276,15 @@ module.exports = {
     });
   },
 
-  Daily: function(UserID) {
+  Daily: function(user_id) {
     return dbQueue.addToQueue({
       "value": this._Daily.bind(this),
-      "args": [UserID]
+      "args": [user_id]
     });
   },
 
-  _Daily: async function(UserID) {
-    if (!UserID) throw new Error('Daily function is missing parameters!')
+  _Daily: async function(user_id) {
+    if (!user_id) throw new Error('Daily function is missing parameters!')
     return new Promise(async (resolve, error) => {
 
       var today = new Date();
@@ -289,43 +307,43 @@ module.exports = {
       today = mm + dd + yyyy;
 
 
-      const Info = await DB.findOne({
+      const Info = await Users.findOne({
         where: {
-          userID: UserID
+          user_id: user_id
         }
       });
       if (Info) {
 
         if (Info.daily != today) {
-          const Info2 = await DB.update({
+          const Info2 = await Users.update({
             daily: today
           }, {
             where: {
-              userID: UserID
+              user_id: user_id
             }
           });
           if (Info2 > 0) {
             return resolve({
-              userid: Info.userID,
+              user_id: Info.user_id,
               updated: true
             })
           }
         } else {
           return resolve({
-            userid: Info.userID,
+            user_id: Info.user_id,
             updated: false,
             timetowait: days + "d " + hours + "h " + minutes + "m " + seconds + "s"
           })
         }
       }
       try {
-        const Info3 = await DB.create({
-          userID: UserID,
+        const Info3 = await Users.create({
+          user_id: user_id,
           balance: 0,
           daily: today
         });
         return resolve({
-          userid: UserID,
+          user_id: user_id,
           updated: true
         })
       } catch (e) {
@@ -351,9 +369,9 @@ module.exports = {
 
     return new Promise(async (resolve, error) => {
 
-      const Info = await DB.findOne({
+      const Info = await Users.findOne({
         where: {
-          userID: FromUser
+          user_id: FromUser
         }
       });
       if (Info) {
@@ -363,26 +381,26 @@ module.exports = {
           return
         }
 
-        const Info6 = await DB.update({
+        const Info6 = await Users.update({
           balance: Info.balance - Amount
         }, {
           where: {
-            userID: FromUser
+            user_id: FromUser
           }
         });
 
-        const Info2 = await DB.findOne({
+        const Info2 = await Users.findOne({
           where: {
-            userID: ToUser
+            user_id: ToUser
           }
         });
         if (Info2) {
 
-          const Info3 = await DB.update({
+          const Info3 = await Users.update({
             balance: Info2.balance + Amount
           }, {
             where: {
-              userID: ToUser
+              user_id: ToUser
             }
           });
           if (Info3 > 0) {
@@ -395,8 +413,8 @@ module.exports = {
           return error('Something went wrong in function Transfer')
         } else {
           try {
-            const Info5 = await DB.create({
-              userID: ToUser,
+            const Info5 = await Users.create({
+              user_id: ToUser,
               balance: Amount,
               daily: 0
             });
@@ -416,16 +434,16 @@ module.exports = {
     });
   },
 
-  Coinflip: function(UserID, Flip, Input) {
+  Coinflip: function(user_id, Flip, Input) {
     return dbQueue.addToQueue({
       "value": this._Coinflip.bind(this),
-      "args": [UserID, Flip, Input]
+      "args": [user_id, Flip, Input]
     });
   },
 
-  _Coinflip: async function(UserID, Flip, Input) {
+  _Coinflip: async function(user_id, Flip, Input) {
     Flip = Flip.toLowerCase()
-    if (!UserID || !Flip || !Input) throw new Error('Coinflip function is missing parameters!')
+    if (!user_id || !Flip || !Input) throw new Error('Coinflip function is missing parameters!')
     if (Flip != 'tails' && Flip != 'heads') throw new Error('Coinflip second parameter needs to be [tails  or heads]')
     if (!parseInt(Input)) throw new Error('Coinflip function parameter Input needs to be a number!')
     Input = parseInt(Input)
@@ -435,9 +453,9 @@ module.exports = {
       const random = ['tails', 'heads']
       const output = random[Math.floor(Math.random() * 2)]
 
-      const Info = await DB.findOne({
+      const Info = await Users.findOne({
         where: {
-          userID: UserID
+          user_id: user_id
         }
       });
       if (Info) {
@@ -448,16 +466,16 @@ module.exports = {
         }
 
         if (Flip != output) {
-          const Info2 = await DB.update({
+          const Info2 = await Users.update({
             balance: Info.balance - Input
           }, {
             where: {
-              userID: UserID
+              user_id: user_id
             }
           });
           if (Info2 > 0) {
             return resolve({
-              userid: UserID,
+              user_id: user_id,
               oldbalance: Info.balance,
               newbalance: Info.balance - Input,
               output: 'lost'
@@ -465,17 +483,17 @@ module.exports = {
           }
           return error('Something went wrong in function Coinflip')
         } else {
-          const Info3 = await DB.update({
+          const Info3 = await Users.update({
             balance: Info.balance + Input
           }, {
             where: {
-              userID: UserID
+              user_id: user_id
             }
           });
           if (Info3 > 0) {
 
             return resolve({
-              userid: UserID,
+              user_id: user_id,
               oldbalance: Info.balance,
               newbalance: Info.balance + Input,
               output: 'won'
@@ -490,15 +508,15 @@ module.exports = {
     });
   },
 
-  Dice: function(UserID, DiceNumber, Input) {
+  Dice: function(user_id, DiceNumber, Input) {
     return dbQueue.addToQueue({
       "value": this._Dice.bind(this),
-      "args": [UserID, DiceNumber, Input]
+      "args": [user_id, DiceNumber, Input]
     });
   },
 
-  _Dice: async function(UserID, DiceNumber, Input) {
-    if (!UserID || !DiceNumber || !Input) throw new Error('Dice function is missing parameters!')
+  _Dice: async function(user_id, DiceNumber, Input) {
+    if (!user_id || !DiceNumber || !Input) throw new Error('Dice function is missing parameters!')
     if (!parseInt(DiceNumber) || ![1, 2, 3, 4, 5, 6].includes(parseInt(DiceNumber))) throw new Error('The Dice number should be 1-6')
     if (!parseInt(Input)) throw new Error('Dice function parameter Input needs to be a number!')
     Input = parseInt(Input)
@@ -508,9 +526,9 @@ module.exports = {
 
       const output = Math.floor((Math.random() * 6) + 1);
 
-      const Info = await DB.findOne({
+      const Info = await Users.findOne({
         where: {
-          userID: UserID
+          user_id: user_id
         }
       });
       if (Info) {
@@ -521,16 +539,16 @@ module.exports = {
         }
 
         if (DiceNumber != output) {
-          const Info2 = await DB.update({
+          const Info2 = await Users.update({
             balance: Info.balance - Input
           }, {
             where: {
-              userID: UserID
+              user_id: user_id
             }
           });
           if (Info2 > 0) {
             return resolve({
-              userid: UserID,
+              user_id: user_id,
               oldbalance: Info.balance,
               newbalance: Info.balance - Input,
               guess: DiceNumber,
@@ -540,17 +558,17 @@ module.exports = {
           }
           return error('Something went wrong in function Dice')
         } else {
-          const Info3 = await DB.update({
+          const Info3 = await Users.update({
             balance: Info.balance + Input
           }, {
             where: {
-              userID: UserID
+              user_id: user_id
             }
           });
           if (Info3 > 0) {
 
             return resolve({
-              userid: UserID,
+              user_id: user_id,
               oldbalance: Info.balance,
               newbalance: Info.balance + Input,
               guess: DiceNumber,
@@ -567,21 +585,21 @@ module.exports = {
     });
   },
 
-  Delete: function(UserID) {
+  Delete: function(user_id) {
     return dbQueue.addToQueue({
       "value": this._Delete.bind(this),
-      "args": [UserID]
+      "args": [user_id]
     });
   },
 
-  _Delete: async function(UserID) {
-    if (!UserID) throw new Error('Delete function is missing parameters!')
+  _Delete: async function(user_id) {
+    if (!user_id) throw new Error('Delete function is missing parameters!')
 
     return new Promise(async (resolve, error) => {
 
-      const Info = await DB.destroy({
+      const Info = await Users.destroy({
         where: {
-          userID: UserID
+          user_id: user_id
         }
       });
       if (Info) {
@@ -597,23 +615,23 @@ module.exports = {
     });
   },
 
-  ResetDaily: function(UserID) {
+  ResetDaily: function(user_id) {
     return dbQueue.addToQueue({
       "value": this._ResetDaily.bind(this),
-      "args": [UserID]
+      "args": [user_id]
     });
   },
 
-  _ResetDaily: async function(UserID) {
-    if (!UserID) throw new Error('ResetDaily function is missing parameters!')
+  _ResetDaily: async function(user_id) {
+    if (!user_id) throw new Error('ResetDaily function is missing parameters!')
 
     return new Promise(async (resolve, error) => {
 
-      const Info = await DB.update({
+      const Info = await Users.update({
         daily: 0
       }, {
         where: {
-          userID: UserID
+          user_id: user_id
         }
       });
       if (Info > 0) {
@@ -621,8 +639,8 @@ module.exports = {
       } else {
 
         try {
-          const Info2 = await DB.create({
-            userID: UserID,
+          const Info2 = await Users.create({
+            user_id: user_id,
             balance: 0,
             daily: 0
           });
@@ -639,15 +657,15 @@ module.exports = {
     });
   },
 
-  Work: function(UserID, data = {}) {
+  Work: function(user_id, data = {}) {
     return dbQueue.addToQueue({
       "value": this._Work.bind(this),
-      "args": [UserID, data]
+      "args": [user_id, data]
     });
   },
 
-  _Work: async function(UserID, data = {}) {
-    if (!UserID) throw new Error('Work function is missing parameters!')
+  _Work: async function(user_id, data = {}) {
+    if (!user_id) throw new Error('Work function is missing parameters!')
     if (data.jobs && !Array.isArray(data.jobs)) throw new Error('Work function parameter data.jobs is not an array!')
     if (data.money && !parseInt(data.money)) throw new Error('Work function parameter data.money needs to be a number!')
     if (data.failurerate && !parseInt(data.failurerate)) throw new Error('Work function parameter data.failurerate needs to be a number!')
@@ -666,26 +684,26 @@ module.exports = {
 
     return new Promise(async (resolve, error) => {
 
-      const Info = await DB.findOne({
+      const Info = await Users.findOne({
         where: {
-          userID: UserID
+          user_id: user_id
         }
       });
       if (Info) {
 
         if (success) {
 
-          const Info2 = await DB.update({
+          const Info2 = await Users.update({
             balance: Info.balance + data.money
           }, {
             where: {
-              userID: UserID
+              user_id: user_id
             }
           });
 
           if (Info2 > 0) {
             return resolve({
-              userid: Info.userID,
+              user_id: Info.user_id,
               earned: data.money,
               job: data.jobs[Math.floor(Math.random() * data.jobs.length)],
               balance: Info.balance + data.money
@@ -694,7 +712,7 @@ module.exports = {
 
         } else {
           return resolve({
-            userid: Info.userID,
+            user_id: Info.user_id,
             earned: 0,
             job: data.jobs[Math.floor(Math.random() * data.jobs.length)],
             balance: Info.balance
@@ -706,13 +724,13 @@ module.exports = {
       try {
         if (!success) data.money = 0;
 
-        const Info3 = await DB.create({
-          userID: UserID,
+        const Info3 = await Users.create({
+          user_id: user_id,
           balance: data.money,
           daily: 0
         });
         return resolve({
-          userid: UserID,
+          user_id: user_id,
           earned: data.money,
           job: data.jobs[Math.floor(Math.random() * data.jobs.length)],
           balance: data.money
@@ -726,15 +744,15 @@ module.exports = {
     });
   },
 
-  Slots: function(UserID, Input, data = {}) {
+  Slots: function(user_id, Input, data = {}) {
     return dbQueue.addToQueue({
       "value": this._Slots.bind(this),
-      "args": [UserID, Input, data]
+      "args": [user_id, Input, data]
     });
   },
 
-  _Slots: async function(UserID, Input, data = {}) {
-    if (!UserID || !Input) throw new Error('Slots function is missing parameters!')
+  _Slots: async function(user_id, Input, data = {}) {
+    if (!user_id || !Input) throw new Error('Slots function is missing parameters!')
     if (data.emojis && !Array.isArray(data.emojis)) throw new Error('Slots function parameter data.emojis needs to be an array!')
     if (!parseInt(Input)) throw new Error('Slots function parameter Input needs to be a number!')
     if (!data.width) data.width = 5
@@ -754,9 +772,9 @@ module.exports = {
         grid.push(row)
       }
 
-      const Info = await DB.findOne({
+      const Info = await Users.findOne({
         where: {
-          userID: UserID
+          user_id: user_id
         }
       });
       if (Info) {
@@ -777,16 +795,16 @@ module.exports = {
 
         var win = await checkWin(grid)
         if (!win) {
-          const Info2 = await DB.update({
+          const Info2 = await Users.update({
             balance: Info.balance - Input
           }, {
             where: {
-              userID: UserID
+              user_id: user_id
             }
           });
           if (Info2 > 0) {
             return resolve({
-              userid: UserID,
+              user_id: user_id,
               oldbalance: Info.balance,
               newbalance: Info.balance - Input,
               grid: grid,
@@ -795,16 +813,16 @@ module.exports = {
           }
           return error('Something went wrong in function Slots')
         } else {
-          const Info3 = await DB.update({
+          const Info3 = await Users.update({
             balance: Info.balance + Input
           }, {
             where: {
-              userID: UserID
+              user_id: user_id
             }
           });
           if (Info3 > 0) {
             return resolve({
-              userid: UserID,
+              user_id: user_id,
               oldbalance: Info.balance,
               newbalance: Info.balance + Input,
               grid: grid,

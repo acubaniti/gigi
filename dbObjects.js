@@ -1,6 +1,6 @@
 const Sequelize = require('sequelize');
 
-const sequelize = new Sequelize('database', 'Hot123', '132435465768798', {
+const sequelize = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
 	logging: false,
@@ -29,6 +29,13 @@ Users.prototype.addItem = async function(item) {
 
 /* eslint-disable-next-line func-names */
 Users.prototype.getItems = function() {
+	return UserItems.findAll({
+		where: { user_id: this.user_id },
+		include: ['item'],
+	});
+};
+
+Users.prototype.hasItem = function() {
 	return UserItems.findAll({
 		where: { user_id: this.user_id },
 		include: ['item'],

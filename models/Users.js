@@ -4,6 +4,15 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.STRING,
 			primaryKey: true,
 		},
+		title: {
+			type: DataTypes.STRING,
+		},
+	  level: {
+			type: DataTypes.INTEGER,
+		},
+		xp: {
+			type: DataTypes.INTEGER,
+		},
 		balance: {
 			type: DataTypes.INTEGER,
 			defaultValue: 0,

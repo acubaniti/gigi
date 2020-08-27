@@ -10,7 +10,6 @@ This will create a unique ID for each guild member
 const fs = require('fs');
 const Discord = require('discord.js'); //This can also be discord.js-commando or other node based packages!
 // const eco = require("discord-economy");
-const eco = require('./index.js');
 
 //Create the bot client
 const client = new Discord.Client();
@@ -64,6 +63,23 @@ Reflect.defineProperty(currency, 'add', {
     },
 });
 
+Reflect.defineProperty(currency, 'addXp', {
+    /* eslint-disable-next-line func-name-matching */
+    value: async function add(id, amount) {
+        const user = currency.get(id);
+        if (user) {
+            user.xp += Number(amount);
+            return user.save();
+        }
+        const newUser = await Users.create({
+            user_id: id,
+            xp: amount
+
+        });
+        currency.set(id, newUser);
+        return newUser;
+    },
+});
 Reflect.defineProperty(currency, 'getBalance', {
     /* eslint-disable-next-line func-name-matching */
     value: function getBalance(id) {
@@ -72,6 +88,13 @@ Reflect.defineProperty(currency, 'getBalance', {
     },
 });
 
+Reflect.defineProperty(currency, 'getXp', {
+    /* eslint-disable-next-line func-name-matching */
+    value: function getBalance(id) {
+        const user = currency.get(id);
+        return user ? user.xp : 0;
+    },
+});
 // var Permissions = {};
 // try{
 // 	Permissions = require("./permissions.json");
@@ -79,6 +102,7 @@ Reflect.defineProperty(currency, 'getBalance', {
 // 	console.log("Please create an permissions.json like auth.json.example with a bot token or an email and password.\n"+e.stack); // send message for error - no token
 //  	process.exit();
 // }
+
 
 
 client.on('message', async message => {
@@ -94,23 +118,11 @@ client.on('message', async message => {
     // }
     //If the message does not start with your prefix return.
     //If the user that types a message is a bot account return.
-    if (!message.content.startsWith(settings.prefix) || message.author.bot) return;
-    if (message.author == client.user) {
-        return true; //returning true to prevent feedback from commands
-    }
+  const dropRate = 1;
+  let dropChance = Math.floor(Math.random() * 10);
+  // console.log(dropRate +" - "+ dropChance);
 
-    currency.add(message.author.id, 1);
-
-    //This reads the first part of your message behind your prefix to see which command you want to use.
-    var command = message.content.toLowerCase().slice(settings.prefix.length).split(' ')[0];
-
-    //These are the arguments behind the commands.
-    var args = message.content.split(' ').slice(1);
-
-
-    const dropRate = 2;
-
-    function randomDrop() {
+  async  function randomDrop() {
         const dropRange = [
             "🥇",
             "🥈",
@@ -118,40 +130,167 @@ client.on('message', async message => {
 
         ];
         const dropValue = [
-            "25",
-            "15",
-            "5"
+            "10",
+            "5",
+            "1"
         ];
 
         var r = Math.floor(Math.random() * dropRange.length);
         message.react(dropRange[r])
             .catch(() => console.error('One of the emojis failed to react.'));
-        eco.AddToBalance(message.author.id, dropValue[r]);
+        // eco.AddToBalance(message.author.id, dropValue[r]);
+        var balance = await currency.getBalance(message.author.id);
+        await currency.add(message.author.id,dropValue[r]);
+
+        // console.log(balance);
         // message.reply(' ai castigat ' + dropValue[r] + ' mei')
     }
 
-    if (message.author != client.user && message.author.id != 723002601066594376 && Math.floor(Math.random() * 3) == dropRate && !message.content.startsWith(settings.prefix)) {
+    // message.author.id != 723002601066594376 &&
+    if (message.author.id != 723002601066594376 &&  dropChance == dropRate &&  !message.content.startsWith(settings.prefix))
+       {
         randomDrop();
+    }
+            // currency.add(message.author.id, 1);
+    if (!message.content.startsWith(settings.prefix) || message.author.bot) return;
+    if (message.author == client.user) {
+        return true; //returning true to prevent feedback from commands
+    }
+
+    currency.addXp(message.author.id, 1);
+    //This reads the first part of your message behind your prefix to see which command you want to use.
+    var command = message.content.toLowerCase().slice(settings.prefix.length).split(' ')[0];
+
+    //These are the arguments behind the commands.
+    var args = message.content.split(' ').slice(1);
+
+    if (command === 'addbalance') {
+        // [gamma]
+        if(!message.member.hasPermission("MANAGE_MESSAGES")) return message.reply("N-ai voie!");
+        const currentAmount = currency.getBalance(message.author.id);
+        const transferAmount = args[1]
+        const transferTarget = message.mentions.users.first();
+
+        if (!transferAmount || isNaN(transferAmount)) return message.channel.send(`Sorry ${message.author}, that's an invalid amount.`);
+        // if (transferAmount > currentAmount) return message.channel.send(`Sorry ${message.author}, you only have ${currentAmount}.`);
+        if (transferAmount <= 0) return message.channel.send(`Please enter an amount greater than zero, ${message.author}.`);
+
+        // currency.add(message.author.id, -transferAmount);
+
+        currency.add(transferTarget.id, transferAmount);
+
+        return message.channel.send(`Successfully transferred ${transferAmount}💰 to ${transferTarget.tag}. Your current balance is ${currency.getBalance(message.author.id)}💰`);
     }
 
 
+        if (command === 'taxeaza') {
+            // [gamma]
+            if(!message.member.hasPermission("MANAGE_MESSAGES")) return message.reply("N-ai voie!");
+            const currentAmount = currency.getBalance(message.author.id);
+            const transferAmount = args[1]
+            const transferTarget = message.mentions.users.first();
+
+            if (!transferAmount || isNaN(transferAmount)) return message.channel.send(`Sorry ${message.author}, that's an invalid amount.`);
+            // if (transferAmount > currentAmount) return message.channel.send(`Sorry ${message.author}, you only have ${currentAmount}.`);
+            if (transferAmount <= 0) return message.channel.send(`Please enter an amount greater than zero, ${message.author}.`);
+
+            // currency.add(message.author.id, -transferAmount);
+
+            currency.add(transferTarget.id, -transferAmount);
+
+            return message.channel.send(`Successfully transferred ${transferAmount}💰 to ${transferTarget.tag}. Your current balance is ${currency.getBalance(message.author.id)}💰`);
+        }
 
 
-    if (command === 'shop') {
+
+
+    if (command === 'magazin') {
         // [gamma]
         const items = await CurrencyShop.findAll();
-        return message.channel.send(items.map(item => `${item.name}: ${item.cost}💰`).join('\n'), {
+        return message.channel.send(items.map(item => `${item.name}: ${item.cost} mei`).join('\n'), {
             code: true
         });
 
     }
-    if (command === 'leaderboard') {
+    if (command === 'barbut') {
+
+    			var roll = args[0] //Should beee a number between 1 and 6
+    			var amount = args[1] //Coins to gamble
+      		if (!amount) var amount = 1
+          let diceRoll = (Math.floor(Math.random() * 5) + 1)
+          var balance = currency.getBalance(message.author.id);
+
+  	    if (balance < amount) return message.reply('Esti sarac, n-ai bani!')
+
+    		if (!roll || ![1, 2, 3, 4, 5, 6].includes(parseInt(roll))) return message.reply('Zi un numar intre `1-6`')
+    			// if (!amount) return message.reply('Cat vrei sa joci bastanule?!')
+        if (roll == diceRoll) {
+          message.reply("Ai dat `"+diceRoll+ "`. Ai castigat.")
+        await  currency.add(message.author.id,  +(amount * 2));
+
+        } else {
+            message.reply("Ai dat `"+diceRoll+"`. Ai pierdut.")
+        await    currency.add(message.author.id,  -amount);
+
+        }
+
+
+}
+if (command === 'pacanele') {
+
+// var roll = args[0] //Should beee a number between 1 and 6
+var amount = args[0] //Coins to gamble
+if (!amount) var amount = 1
+
+let balance = currency.getBalance(message.author.id);
+const dropRange = [
+"🍒",
+"🍋",
+"🥦",
+
+];
+if (balance < amount) return message.reply('Esti sarac, n-ai bani!')
+
+let a = Math.floor(Math.random() * dropRange.length);
+let b = Math.floor(Math.random() * dropRange.length);
+let c = Math.floor(Math.random() * dropRange.length);
+// eco.AddToBalance(message.author.id, dropValue[r]);
+// var balance = await currency.getBalance(message.author.id);
+// await currency.add(message.author.id,dropValue[r]);
+if (a == b && b == c && c == 0) {
+    await currency.add(message.author.id, +(amount * 6));
+  message.reply("Ai castigat `" + (amount * 6) + "` mei.");
+  return   message.channel.send("`"+dropRange[a] + dropRange[b] + dropRange[c]+"`");
+};
+ if (a == b && b == c && c == 1) {
+       await currency.add(message.author.id, +(amount * 3));
+   message.reply("Ai castigat `" + (amount * 3) + "` mei.");
+
+   return   message.channel.send("`"+dropRange[a] + dropRange[b] + dropRange[c]+"`");
+
+};
+ if (a == b && b == c && c == 2) {
+     await currency.add(message.author.id,  +amount);
+  message.reply("Ai castigat `" + amount + "` mei.");
+  return   message.channel.send("`"+dropRange[a] + dropRange[b] + dropRange[c]+"`");
+
+
+};
+  // message.reply("Ai pierdut " + amount + " mei." )
+  await currency.add(message.author.id,  -amount);
+  return   message.channel.send("`"+dropRange[a] + dropRange[b] + dropRange[c]+"`");
+
+
+
+}
+
+    if (command === 'top') {
         // [gamma]
         return message.channel.send(
             currency.sort((a, b) => b.balance - a.balance)
             .filter(user => client.users.cache.has(user.user_id))
             .first(10)
-            .map((user, position) => `(${position + 1}) ${(client.users.cache.get(user.user_id).tag)}: ${user.balance}💰`)
+            .map((user, position) => `(${position + 1}) ${(client.users.cache.get(user.user_id).tag)}: ${user.balance} 💰`)
             .join('\n'), {
                 code: true
             }
@@ -159,29 +298,37 @@ client.on('message', async message => {
 
     }
 
-    if (command === 'balance') {
+    if (command === 'portofel') {
         // [gamma]
         const target = message.mentions.users.first() || message.author;
-        return message.channel.send(`${target.tag} has ${currency.getBalance(target.id)}💰`);
+        return message.channel.send(`<@${target.id}> are ${currency.getBalance(target.id)} mei.`);
+
 
     }
-    if (command === 'western') {
+    if (command === 'experienta') {
+        // [gamma]
+        const target = message.mentions.users.first() || message.author;
+        return message.channel.send(`<@${target.id}> are ${currency.getXp(target.id)} experienta.`);
+
+    }
+
+    if (command === 'transfer') {
         // [gamma]
         const currentAmount = currency.getBalance(message.author.id);
-        const transferAmount = commandArgs.split(/ +/g).find(arg => !/<@!?\d+>/g.test(arg));
+        const transferAmount = args[1]
         const transferTarget = message.mentions.users.first();
 
-        if (!transferAmount || isNaN(transferAmount)) return message.channel.send(`Sorry ${message.author}, that's an invalid amount.`);
-        if (transferAmount > currentAmount) return message.channel.send(`Sorry ${message.author}, you only have ${currentAmount}.`);
-        if (transferAmount <= 0) return message.channel.send(`Please enter an amount greater than zero, ${message.author}.`);
+        if (!transferAmount || isNaN(transferAmount)) return message.channel.send(`${message.author}, suma invalida.`);
+        if (transferAmount > currentAmount) return message.channel.send(`${message.author}, esti sarac, ai doar ${currentAmount}.`);
+        if (transferAmount <= 0) return message.channel.send(`Adauga suma, ${message.author}.`);
 
         currency.add(message.author.id, -transferAmount);
-        F
+
         currency.add(transferTarget.id, transferAmount);
 
-        return message.channel.send(`Successfully transferred ${transferAmount}💰 to ${transferTarget.tag}. Your current balance is ${currency.getBalance(message.author.id)}💰`);
+        return message.channel.send(`Ai transferat ${transferAmount} catre ${transferTarget.tag}. Mai ai ${currency.getBalance(message.author.id)} mei in portofel.`);
     }
-    if (command === 'inventory') {
+    if (command === 'inventar') {
         // [gamma]
         const target = message.mentions.users.first() || message.author;
         const user = await Users.findOne({
@@ -191,11 +338,11 @@ client.on('message', async message => {
         });
         const items = await user.getItems();
 
-        if (!items.length) return message.channel.send(`${target.tag} has nothing!`);
-        return message.channel.send(`${target.tag} currently has ${items.map(i => `${i.amount} ${i.item.name}`).join(', ')}`);
+        if (!items.length) return message.channel.send(`${target.tag} nu ai nimic pe tine, saracie!`);
+        return message.channel.send(`${target.tag} ai \n ${items.map(i => `${i.amount} ${i.item.name}`).join(', \n ')}`);
     }
 
-    if (command === 'buy') {
+    if (command === 'cumpara') {
         // [gamma]
         const item = await CurrencyShop.findOne({
             where: {
@@ -204,9 +351,9 @@ client.on('message', async message => {
                 }
             }
         });
-        if (!item) return message.channel.send(`That item doesn't exist.`);
+        if (!item) return message.channel.send(`Acest obiect nu exista.`);
         if (item.cost > currency.getBalance(message.author.id)) {
-            return message.channel.send(`You currently have ${currency.getBalance(message.author.id)}, but the ${item.name} costs ${item.cost}!`);
+            return message.channel.send(`Momentan ai ${currency.getBalance(message.author.id)}, dar ${item.name} costa ${item.cost}!`);
         }
 
         const user = await Users.findOne({
@@ -220,9 +367,52 @@ client.on('message', async message => {
         message.channel.send(`You've bought: ${item.name}.`);
 
     }
+    if (command === 'cumpara') {
+        // [gamma]
+        const item = await CurrencyShop.findOne({
+            where: {
+                name: {
+                    [Op.like]: args
+                }
+            }
+        });
+        if (!item) return message.channel.send(`Acest obiect nu exista.`);
+        if (item.cost > currency.getBalance(message.author.id)) {
+            return message.channel.send(`Momentan ai ${currency.getBalance(message.author.id)}, dar ${item.name} costa ${item.cost}!`);
+        }
 
+        const user = await Users.findOne({
+            where: {
+                user_id: message.author.id
+            }
+        });
+        currency.add(message.author.id, -item.cost);
+        await user.addItem(item);
 
+        message.channel.send(`You've bought: ${item.name}.`);
 
+    }
+    if (command === "use") {
+
+      const item = args[0];
+      const userItem = await  function() {
+      	return UserItems.findAll({
+      		where: { user_id: this.user_id },
+      		include: ['item'],
+      	});
+      };
+
+      if (!userItem) return message.channel.send(`Acest obiect nu exista.`);
+      if (userItem) { 
+        console.log('merge'+ item + userItem);
+    	}
+    }
+
+    // const swearWords = ["darn", "shucks", "frak", "shite"];
+    // if( swearWords.some(word => message.content.includes(word)) ) {
+    //   message.reply("Oh no you said a bad word!!!");
+    //   // Or just do message.delete();
+    // }
 
     // Load commands
     if (!client.commands.has(command)) return;
@@ -247,8 +437,8 @@ client.on('guildMemberAdd', member => {
     // Send the message, mentioning the member
     channel.send(`Ai primit 100 de mei, ${member}, scrie $ajutor pentru a vedea comenzile de joc.`);
     var amount = 100;
-    var transfer = eco.SetBalance(member.id, amount)
-    var balance = eco.FetchBalance(member.id)
+    var transfer = currency.add(member.id,amount);
+    var balance = currency.getBalance(member.id);
 });
 
 

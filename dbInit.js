@@ -1,6 +1,6 @@
 const Sequelize = require('sequelize');
 
-const sequelize = new Sequelize('database', 'Hot123', '132435465768798', {
+const sequelize = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
 	logging: false,
@@ -15,20 +15,16 @@ const force = process.argv.includes('--force') || process.argv.includes('-f');
 
 sequelize.sync({ force }).then(async () => {
 	const shop = [
-		CurrencyShop.upsert({ name: 'Tigari', cost: 10 }),
-		CurrencyShop.upsert({ name: 'Prajitura', cost: 3 }),
-		CurrencyShop.upsert({ name: 'Cafea', cost: 15 }),
-		CurrencyShop.upsert({ name: 'Sticla de whiskey', cost: 500 }),
-		CurrencyShop.upsert({ name: 'Ranga', cost: 1500 }),
-		CurrencyShop.upsert({ name: 'Prezervativ', cost: 15 }),
-		CurrencyShop.upsert({ name: 'Bata de baseball', cost: 1500 }),
-		CurrencyShop.upsert({ name: 'Cagula', cost: 1500 }),
-		CurrencyShop.upsert({ name: 'Pistol', cost: 3500 }),
-		CurrencyShop.upsert({ name: 'Mitraliera', cost: 4500 }),
-		CurrencyShop.upsert({ name: 'Masina', cost: 5500 }),
-		CurrencyShop.upsert({ name: 'Cautiune', cost: 99999 }),
+		CurrencyShop.upsert({ name: 'prezervativ', cost: 15 }),
+		CurrencyShop.upsert({ name: 'cutit', cost: 300, damage:10 }),
+		CurrencyShop.upsert({ name: 'pistol', cost: 2500 , damage: 25}),
+		CurrencyShop.upsert({ name: 'ak47', cost: 5500, damage: 50 }),
+		CurrencyShop.upsert({ name: 'telefon', cost: 250 }),
+		CurrencyShop.upsert({ name: 'armura', cost: 1500, damage: 100 }),
+		CurrencyShop.upsert({ name: 'cheie', cost: 100 }),
+		CurrencyShop.upsert({ name: 'cutie', cost: 1500 }),
 	];
 	await Promise.all(shop);
 	console.log('Database synced');
 	sequelize.close();
-});
+}).catch(console.error);
