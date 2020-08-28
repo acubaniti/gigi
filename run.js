@@ -138,11 +138,12 @@ client.on('message', async message => {
         var r = Math.floor(Math.random() * dropRange.length);
         message.react(dropRange[r])
             .catch(() => console.error('One of the emojis failed to react.'));
+        // eco.AddToBalance(message.author.id, dropValue[r]);
         var balance = await currency.getBalance(message.author.id);
         await currency.add(message.author.id,dropValue[r]);
 
         // console.log(balance);
-        message.reply(' ai castigat ' + dropValue[r] + ' mei')
+        // message.reply(' ai castigat ' + dropValue[r] + ' mei')
     }
 
     // message.author.id != 723002601066594376 &&
@@ -150,13 +151,13 @@ client.on('message', async message => {
     //    {
     //     randomDrop();
     // }
-            // currency.add(message.author.id, 1);
+    //         // currency.add(message.author.id, 1);
     if (!message.content.startsWith(settings.prefix) || message.author.bot) return;
     if (message.author == client.user) {
         return true; //returning true to prevent feedback from commands
     }
 
-    currency.addXp(message.author.id, 1);
+    // currency.addXp(message.author.id, 1);
     //This reads the first part of your message behind your prefix to see which command you want to use.
     var command = message.content.toLowerCase().slice(settings.prefix.length).split(' ')[0];
 
@@ -197,7 +198,7 @@ client.on('message', async message => {
 
             currency.add(transferTarget.id, -transferAmount);
 
-            return message.channel.send(`Successfully transferred ${transferAmount}💰 to ${transferTarget.tag}. Your current balance is ${currency.getBalance(message.author.id)}💰`);
+            return message.channel.send(`Successfully taxed ${transferAmount}💰 to ${transferTarget.tag}. Your current balance is ${currency.getBalance(message.author.id)}💰`);
         }
 
 
@@ -330,23 +331,33 @@ if (a == b && b == c && c == 0) {
     if (command === 'inventar') {
         // [gamma]
         const target = message.mentions.users.first() || message.author;
-        const user = await UserItems.findOne({
+        const user = await Users.findOne({
             where: {
                 user_id: target.id
             }
         });
         const items = await user.getItems();
+        const inventoryEmbed = new Discord.MessageEmbed().setTitle('Inventar').setDescription('Tot ce ai la tine.').setFooter('Scrie $ajutor pentru toate comenzile');;
 
+        items.forEach(function(i) {
+
+       // console.log(i.amount+ ' - ' + i.item.name)
+       inventoryEmbed.addFields(	{ name: i.item.name + " - `" + i.amount + "`", value: "\u200b"} )
+
+     })
         if (!items.length) return message.channel.send(`${target.tag} nu ai nimic pe tine, saracie!`);
-        return message.channel.send(`${target.tag} ai \n ${items.map(i => `${i.amount} ${i.item.name}`).join(', \n ')}`);
+        return message.channel.send(inventoryEmbed);
+        // return message.channel.send(`${target.tag} ai \n ${items.map(i => `${i.item.name} - ${i.amount} `).join(' \n ')}`);
+
     }
+
 
     if (command === 'cumpara') {
         // [gamma]
         const item = await CurrencyShop.findOne({
             where: {
                 name: {
-                    [Op.like]: args
+                    [Op.like]: args[0]
                 }
             }
         });
@@ -366,10 +377,7 @@ if (a == b && b == c && c == 0) {
         message.channel.send(`You've bought: ${item.name}.`);
 
     }
-
-    if (command === "use") {
-      // return message.channel.send(`${target.tag} ai \n ${items.map(i => `${i.amount} ${i.item.name}`).join(', \n ')}`);
-      // console.log('test 1');
+    if (command === "foloseste") {
       const item = await CurrencyShop.findOne({
           where: {
               name: {
@@ -377,24 +385,106 @@ if (a == b && b == c && c == 0) {
               }
           }
       });
+      const item2 = await CurrencyShop.findOne({
+          where: {
+              name: {
+                  [Op.like]: args[1]
+              }
+          }
+      });
+      const user = await Users.findOne({
+          where: {
+              user_id: message.author.id
+          }
+      });
       if (!item) return message.channel.send(`Acest obiect nu exista.`);
-      
-      if (args[0] === "cheie") {
-        const target = message.author;
+      // if (!item || !item2) return message.channel.send(`Acest obiect nu exista.`);
 
-        // [gamma]
-        const user = await UserItems.findOne({
-            where: {
-                user_id: target.id
-            }
-        });
-        const items = await user.getItems();
-
-        if (!items.length) return message.channel.send(`${target.tag} nu ai nimic pe tine, saracie!`);
-        return message.channel.send(`${target.tag} ai \n ${items.map(i => `${i.amount} ${i.item.name}`).join(', \n ')}`);
-
+      if (await user.hasItem(item) == null) {
+          return message.channel.send( "Nu ai toate obiectele necesare, iti lipseste `" + item.name + "`");
       }
-    }
+
+      if (args[0] === "cheie") {
+        if (!args[1]) return message.channel.send(`Pe ce obiect folosesti cheia?`);
+        if (!item2) return message.channel.send(`Acest obiect nu exista. `+ args[1] );
+
+        if (args[1] === "cutie") {
+          if (await user.hasItem(item2) == null) {
+             return message.channel.send( "Nu ai toate obiectele necesare, iti lipseste `" + item2.name + "`");
+          }
+          var dropValue = Math.floor(Math.random() * 3000);
+          var xpValue = Math.floor(Math.random() * 30);
+          await user.deleteItem(item);
+          await user.deleteItem(item2);
+          console.log( " iteme sterse" )
+          message.channel.send( "Felicitari, ai folosit `" + item2.name + "` si `" + item.name + "`");
+          await currency.add(message.author.id,dropValue);
+          await currency.addXp(message.author.id, xpValue);;
+          return message.channel.send( "Ai castigat `" + dropValue + "` mei si `" + xpValue + "` experienta");
+          }
+           // await user.hasItem(item2);
+           console.log( "Use process finished with error: Empty item loop" )
+        }
+          if (args[0] === "cutit") {
+
+            var damageDealt = Math.floor(Math.random() * 30);
+            var amountStolen = Math.floor(Math.random() * 30);
+            const target = message.mentions.users.first();
+            if (!target) return message.channel.send(`Pe cine vrei sa injunghii?`);
+            if (target.id === settings.admin) return message.channel.send("Ai incercat sa il futi pe <@" + target.id + ">, dar te-a futut el pe tine.");
+
+            await currency.addXp(message.author.id, damageDealt);
+            await currency.add(message.author.id, amountStolen);
+            await currency.add(target.id, -amountStolen);
+            return message.channel.send("L-ai intepat pe <@" + target.id + ">, ai facut `" + damageDealt + "` experienta si ai furat `" + amountStolen + "` mei");
+
+          }
+
+          if (args[0] === "ak47") {
+
+            var damageDealt = Math.floor(Math.random() * 100);
+            var amountStolen = Math.floor(Math.random() * 100);
+            const target = message.mentions.users.first();
+            if (!target) return message.channel.send(`Pe cine vrei sa impusti?`);
+            if (target.id === settings.admin) return message.channel.send("Ai incercat sa il futi pe <@" + target.id + ">, dar te-a futut el pe tine.");
+                        await currency.addXp(message.author.id, damageDealt);
+            await currency.add(message.author.id, amountStolen);
+            await currency.add(target.id, -amountStolen);
+            return message.channel.send("L-ai impuscat pe <@" + target.id + ">, ai facut `" + damageDealt + "` experienta si ai furat `" + amountStolen + "` mei");
+
+          }
+          if (args[0] === "pistol") {
+
+            var damageDealt = Math.floor(Math.random() * 50);
+            var amountStolen = Math.floor(Math.random() * 50);
+            const target = message.mentions.users.first();
+            if (!target) return message.channel.send(`Pe cine vrei sa impusti?`);
+            if (target.id === settings.admin) return message.channel.send("Ai incercat sa il futi pe <@" + target.id + ">, dar te-a futut el pe tine.");
+            await currency.addXp(message.author.id, damageDealt);
+            await currency.add(message.author.id, amountStolen);
+            await currency.add(target.id, -amountStolen);
+            return message.channel.send("L-ai impuscat pe <@" + target.id + ">, ai facut `" + damageDealt + "` experienta si ai furat `" + amountStolen + "` mei");
+
+          }
+          if (args[0] === "prezervativ") {
+            var experienta =  Math.floor(Math.random() * 20);
+            var amountStolen =  Math.floor(Math.random() * 10);
+            await user.deleteItem(item);
+            const target = message.mentions.users.first();
+            // if (target.id === settings.admin) return message.channel.send("Ai incercat sa il futi pe <@" + target.id + ">, dar te-a futut el pe tine.");
+            await currency.addXp(message.author.id, experienta);
+            if (target) {
+              if (target.id === settings.admin) return message.channel.send("Ai incercat sa il futi pe <@" + target.id + ">, dar te-a futut el pe tine.");
+              await currency.add(message.author.id, amountStolen);
+              await currency.add(target.id, -amountStolen);
+               return message.channel.send("L-ai futut pe <@" + target.id + ">, ai facut `" + experienta + "` experienta si ai furat `" + amountStolen + "` mei");
+           }
+
+            return message.channel.send("Ti-ai pus prezervativ, acum futi cu efect. Ai facut `" + experienta + "` experienta.");
+          }
+      }
+
+
 
     // const swearWords = ["darn", "shucks", "frak", "shite"];
     // if( swearWords.some(word => message.content.includes(word)) ) {

@@ -21,7 +21,9 @@ const help = new Discord.MessageEmbed()
 		// { name: '$munca', value: 'Du-te la munca, saracule!' },
 		// { name: '$ban', value: 'Da cu banu, cap sau pajura!' },
 		{ name: '$barbut', value: 'Joaca un barbut cu baietii.' },
-		{ name: '$pacanele', value: 'Baga un ban la pacanea ca baietii.' }
+		{ name: '$pacanele', value: 'Baga un ban la pacanea ca baietii.' },
+		{ name: '$foloseste', value: 'Foloseste un obiect. <obiect> <user> sau <obiect> <obiect>' }
+
 
 	)
 	const adminHelp = new Discord.MessageEmbed()

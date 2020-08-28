@@ -26,7 +26,23 @@ Users.prototype.addItem = async function(item) {
 
 	return UserItems.create({ user_id: this.user_id, item_id: item.id, amount: 1 });
 };
+Users.prototype.deleteItem = async function(item) {
+	const userItem = await UserItems.findOne({
+		where: { user_id: this.user_id, item_id: item.id },
+	});
+	if (userItem === null) {
+		return console.log("deleteItem prototype error, user does not have items");
+	}
+	if (userItem) {
+		var amount = userItem.amount;
+		if(amount  === 1 || amount < 0) { 
+				return userItem.destroy();
 
+		}
+		userItem.amount -= 1;
+		return userItem.save();
+	}
+};
 /* eslint-disable-next-line func-names */
 Users.prototype.getItems = function() {
 	return UserItems.findAll({
@@ -35,12 +51,18 @@ Users.prototype.getItems = function() {
 	});
 };
 
-Users.prototype.hasItem = function() {
-	return UserItems.findAll({
-		where: { user_id: this.user_id },
-		include: ['item'],
-	});
-	
-};
 
+Users.prototype.hasItem = async function(item) {
+	const userItem = await UserItems.findOne({
+		where: { user_id: this.user_id, item_id: item.id },
+	});
+	return userItem;
+	// if (userItem === null) {
+	// 	return userItem;
+	// }
+	// if (userItem) {
+	//  return userItem;
+	// 	}
+
+};
 module.exports = { Users, CurrencyShop, UserItems };
