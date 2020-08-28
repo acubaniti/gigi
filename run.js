@@ -166,7 +166,7 @@ client.on('message', async message => {
 
     if (command === 'addbalance') {
         // [gamma]
-        if(!message.member.hasPermission("MANAGE_MESSAGES")) return message.reply("N-ai voie!");
+        if(!message.member.hasPermission(['KICK_MEMBERS', 'BAN_MEMBERS']))) return message.reply("N-ai voie!");
         const currentAmount = currency.getBalance(message.author.id);
         const transferAmount = args[1]
         const transferTarget = message.mentions.users.first();
@@ -185,7 +185,7 @@ client.on('message', async message => {
 
         if (command === 'taxeaza') {
             // [gamma]
-            if(!message.member.hasPermission("MANAGE_MESSAGES")) return message.reply("N-ai voie!");
+            if(!message.member.hasPermission(['KICK_MEMBERS', 'BAN_MEMBERS']))) return message.reply("N-ai voie!");
             const currentAmount = currency.getBalance(message.author.id);
             const transferAmount = args[1]
             const transferTarget = message.mentions.users.first();
