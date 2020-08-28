@@ -138,19 +138,18 @@ client.on('message', async message => {
         var r = Math.floor(Math.random() * dropRange.length);
         message.react(dropRange[r])
             .catch(() => console.error('One of the emojis failed to react.'));
-        // eco.AddToBalance(message.author.id, dropValue[r]);
         var balance = await currency.getBalance(message.author.id);
         await currency.add(message.author.id,dropValue[r]);
 
         // console.log(balance);
-        // message.reply(' ai castigat ' + dropValue[r] + ' mei')
+        message.reply(' ai castigat ' + dropValue[r] + ' mei')
     }
 
     // message.author.id != 723002601066594376 &&
-    if (message.author.id != 723002601066594376 &&  dropChance == dropRate &&  !message.content.startsWith(settings.prefix))
-       {
-        randomDrop();
-    }
+    // if (message.author.id != 723002601066594376 &&  dropChance == dropRate &&  !message.content.startsWith(settings.prefix))
+    //    {
+    //     randomDrop();
+    // }
             // currency.add(message.author.id, 1);
     if (!message.content.startsWith(settings.prefix) || message.author.bot) return;
     if (message.author == client.user) {
@@ -331,7 +330,7 @@ if (a == b && b == c && c == 0) {
     if (command === 'inventar') {
         // [gamma]
         const target = message.mentions.users.first() || message.author;
-        const user = await Users.findOne({
+        const user = await UserItems.findOne({
             where: {
                 user_id: target.id
             }
@@ -367,45 +366,34 @@ if (a == b && b == c && c == 0) {
         message.channel.send(`You've bought: ${item.name}.`);
 
     }
-    if (command === 'cumpara') {
-        // [gamma]
-        const item = await CurrencyShop.findOne({
-            where: {
-                name: {
-                    [Op.like]: args
-                }
-            }
-        });
-        if (!item) return message.channel.send(`Acest obiect nu exista.`);
-        if (item.cost > currency.getBalance(message.author.id)) {
-            return message.channel.send(`Momentan ai ${currency.getBalance(message.author.id)}, dar ${item.name} costa ${item.cost}!`);
-        }
 
-        const user = await Users.findOne({
-            where: {
-                user_id: message.author.id
-            }
-        });
-        currency.add(message.author.id, -item.cost);
-        await user.addItem(item);
-
-        message.channel.send(`You've bought: ${item.name}.`);
-
-    }
     if (command === "use") {
+      // return message.channel.send(`${target.tag} ai \n ${items.map(i => `${i.amount} ${i.item.name}`).join(', \n ')}`);
+      // console.log('test 1');
+      const item = await CurrencyShop.findOne({
+          where: {
+              name: {
+                  [Op.like]: args[0]
+              }
+          }
+      });
+      if (!item) return message.channel.send(`Acest obiect nu exista.`);
+      
+      if (args[0] === "cheie") {
+        const target = message.author;
 
-      const item = args[0];
-      const userItem = await  function() {
-      	return UserItems.findAll({
-      		where: { user_id: this.user_id },
-      		include: ['item'],
-      	});
-      };
+        // [gamma]
+        const user = await UserItems.findOne({
+            where: {
+                user_id: target.id
+            }
+        });
+        const items = await user.getItems();
 
-      if (!userItem) return message.channel.send(`Acest obiect nu exista.`);
-      if (userItem) { 
-        console.log('merge'+ item + userItem);
-    	}
+        if (!items.length) return message.channel.send(`${target.tag} nu ai nimic pe tine, saracie!`);
+        return message.channel.send(`${target.tag} ai \n ${items.map(i => `${i.amount} ${i.item.name}`).join(', \n ')}`);
+
+      }
     }
 
     // const swearWords = ["darn", "shucks", "frak", "shite"];

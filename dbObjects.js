@@ -40,6 +40,7 @@ Users.prototype.hasItem = function() {
 		where: { user_id: this.user_id },
 		include: ['item'],
 	});
+	
 };
 
 module.exports = { Users, CurrencyShop, UserItems };
