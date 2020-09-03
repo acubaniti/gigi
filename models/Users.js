@@ -6,12 +6,20 @@ module.exports = (sequelize, DataTypes) => {
 		},
 		title: {
 			type: DataTypes.STRING,
+			defaultValue: 'Fraier',
+			allowNull: true,
 		},
 	  level: {
 			type: DataTypes.INTEGER,
+			defaultValue: 0,
+		},
+		hp: {
+			type: DataTypes.INTEGER,
+			defaultValue: 100,
 		},
 		xp: {
 			type: DataTypes.INTEGER,
+			defaultValue: 0,
 		},
 		balance: {
 			type: DataTypes.INTEGER,

@@ -9,9 +9,8 @@ module.exports = (sequelize, DataTypes) => {
 			allowNull: false,
 			'default': 0,
 		},
-		damage: {
-			type: DataTypes.INTEGER,
-			allowNull: true,
+		uses: {
+			type: DataTypes.INTEGER, 
 			'default': 0,
 		},
 	}, {

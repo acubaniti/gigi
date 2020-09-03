@@ -22,4 +22,7 @@
 // 	}
 // };
 //
+// // // <Guild>.members Guild>.members.array() .cache
+// const list  = client.guilds.cache.get("710765073114595389");
 // // <Guild>.members Guild>.members.array() .cache
+// list.members.cache.forEach(member => console.log(member.user.username));
