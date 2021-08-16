@@ -8,12 +8,13 @@ This will create a unique ID for each guild member
 
 //Requiring Packages
 const fs = require('fs');
-const Discord = require('discord.js'); //This can also be discord.js-commando or other node based packages!
-// const eco = require("discord-economy");
- 
-//Create the bot client
+const { Client, Intents } = require('discord.js');
+
 const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
 
+client.once('ready', () => {
+	console.log('Ready!');
+});
 const {
         Users,
         CurrencyShop
