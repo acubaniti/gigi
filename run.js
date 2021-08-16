@@ -13,6 +13,7 @@ const Discord = require('discord.js'); //This can also be discord.js-commando or
  
 //Create the bot client
 const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
+
 const {
         Users,
         CurrencyShop
